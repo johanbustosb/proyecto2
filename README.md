@@ -1,46 +1,9 @@
-# Jornada de almuerzo ¡gratis!
+#INFO SOBRE EL DOCKER
 
-Un reconocido restaurante ha decidido tener una jornada de donación de comida a los residentes de la región con la única condición de que el plato que obtendrán los comensales será aleatorio. El administrador del restaurante requiere con urgencia un sistema que permita pedir platos a la cocina.
+nginx: Este servicio utiliza la imagen oficial de Nginx y se encarga de servir los archivos estáticos y actuar como proxy inverso para dirigir el tráfico a otros servicios. Está configurado para escuchar en el puerto 8181 de la máquina host y se mapea al puerto 80 del contenedor Nginx. Además, monta un archivo de configuración personalizado default.conf desde el directorio local ./docker/nginx/ en el contenedor para personalizar la configuración de Nginx. Este servicio también utiliza el volumen del servicio php.
 
-# Despliegue 
-Clone el repositorio
-```
-git clone https://ariasantonio@bitbucket.org/ariasantonio/almuerzo.git alegra
-```
-Ingrese al directorio creado
-```
-cd  alegra
-```
-Copie y edite el archivo de configuraciòn acorde a sus necesidades
-```
-cp  backend/.env.example backend/.env
-```
+frontend: Este servicio utiliza un Dockerfile personalizado ubicado en ./docker/node/ para construir una imagen del contenedor. Este servicio se utiliza para servir el frontend de la aplicación. Está configurado para escuchar en el puerto 8182 de la máquina host y se mapea al puerto 8080 del contenedor. Además, monta el directorio ./frontend en el directorio /app del contenedor para proporcionar los archivos de la aplicación frontend.
 
-Construya las imagenes
-```
-docker-compose build
-```
-Inicie los contenedores
-```
-docker-compose up -d
-```
-# Base Datos
-Para ejecutar las migraciones y los seed de los ingredientes y recetas use lo siguiente (asumiendo que el contenedor de php se llama alegra_php_1). Esto borra y crea las tablas de la base datos
-```
-docker exec alegra_php_1 php artisan migrate:fresh
-```
-```
-docker exec alegra_php_1 php artisan db:seed
-```
-# Incidencias
-En caso de algunas incidencias puede probar lo siguiente:
-```
-docker exec alegra_php_1 composer update
-```
-```
-docker exec alegra_php_1 chmod 777 -R storage
-```
+php: Este servicio utiliza un Dockerfile personalizado ubicado en ./docker/php/ para construir una imagen del contenedor. Está configurado para ejecutar un servidor PHP para servir la aplicación backend. Monta el directorio ./backend en el directorio /var/www/html del contenedor para proporcionar los archivos de la aplicación backend. También monta un archivo de configuración personalizado custom.ini desde ./docker/php/ en el contenedor para personalizar la configuración de PHP. Este servicio también establece variables de entorno para la base de datos, como el puerto y el host del servicio database. Además, utiliza el enlace al servicio database.
 
-# NOTAS
-- Si edita datos referentes a la base datos en el archivo .env tenga esa consideracion en docker-compose.yml
-- Asegurese que la ruta configurada en el docker-compose.yml para la persistencia de la base datos este disponible
+database: Este servicio utiliza la imagen oficial de MySQL 5.7 para ejecutar una base de datos MySQL. Está configurado con una contraseña de root y una base de datos predeterminada. Además, monta un volumen en el directorio /var/lib/mysql del contenedor para persistir los datos de la base de datos. Está configurado para escuchar en el puerto 33065 de la máquina host y se mapea al puerto 3306 del contenedor.
